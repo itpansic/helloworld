@@ -23,14 +23,15 @@ targetName := helloworld
 $(warning ----------------------)
 #依赖关系
 .PHONY:all
-all : dep $(targetName)
-$(warning ----------------------)
-dep:
+all : $(targetName)
+
 %.d: %.c
 	@set -e; rm -f $@; /
-	$(CC) -MM  $< > $@.$$$$; /
-	sed 's,/($*/)/.o[ :]*,/1.o $@ : ,g' < $@.$$$$ > $@; /
+	$(CC) -MM $(CFLAGS) $< > $@.$$$$; /
+	c
 	rm -f $@.$$$$
+	$(warning ----------------------sed 's,/($*/)/.o[ :]*,/1.o $@ : ,g' < $@.$$$$ > $@;)
+
 $(warning ----------------------)
 sinclude $(listSources:.c=.d)
 $(warning ----------------------)
