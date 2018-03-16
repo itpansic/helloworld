@@ -3,8 +3,8 @@
 CC = gcc
 
 #目录
-dirInclude := ./include
-dirSrc := ./src
+dirInclude := include
+dirSrc := src
 
 #目录设置
 vpath %.h $(dirInclude)
@@ -16,28 +16,29 @@ CFLAGS = -I$(dirInclude)
 
 #文件集合
 listSources := $(wildcard $(dirSrc)/*.c)
-listObjects := $(patsubst %.c,%.o, $(notdir $(listSources)))
-listDeps != $(patsubst %.c,%.d, $(listSources))
+listObjects := $(patsubst %.c,%.o, $(listSources))
+listDeps := $(listSources:.c=.d)
 #编译目标名称
 targetName := helloworld
-$(warning ----------------------)
+
 #依赖关系
 .PHONY:all
-all : $(targetName)
+all : dep $(targetName)
+dep : $(listDeps)
 
-%.d: %.c
-	@set -e; rm -f $@; /
-	$(CC) -MM $(CFLAGS) $< > $@.$$$$; /
-	c
+$(listDeps) : %.d: %.c
+	rm -f $@;\
+	$(CC) -MM $(CFLAGS) $< > $@.$$$$;\
+	sed 's?$(notdir $*).o:?$(notdir $*).o $(notdir $*).d :?g' < $@.$$$$ > $@;\
 	rm -f $@.$$$$
-	$(warning ----------------------sed 's,/($*/)/.o[ :]*,/1.o $@ : ,g' < $@.$$$$ > $@;)
+	
+	
 
-$(warning ----------------------)
-sinclude $(listSources:.c=.d)
-$(warning ----------------------)
+$(warning --------------------1)
+include $(listDeps)
+$(warning --------------------2)
 $(targetName) : $(listObjects)
-$(warning ----------------------)
-#	$(CC) -o $@ $^
+	$(CC) -o $@ $^
 
 #main.o : common.h
 #	$(CC) -c $(CFLAGS) $(dirSrc)/$(patsubst %.o,%.c, $@)
@@ -47,5 +48,6 @@ $(warning ----------------------)
 
 
 clean :
-	-rm $(listObjects) $(targetName)
-	$(warning ----------------------)
+	-rm $(listObjects) $(targetName) $(listDeps)
+
+	 

@@ -1,1 +1,0 @@
-ljprint.o: src/ljprint.c include/ljprint.h

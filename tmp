@@ -1,0 +1,61 @@
+
+#编译器名称
+CC = gcc
+
+#目录
+dirInclude := include
+dirSrc := src
+dirBuild := build
+
+#目录设置
+vpath %.h $(dirInclude)
+vpath %.c %(dirSrc)
+vpath %.d %(dirSrdirBuildc)
+vpath %.o %(dirSrdirBuildc)
+
+#环境变量
+CFLAGS = -I$(dirInclude)
+
+#文件集合
+listSources := $(notdir $(wildcard $(dirSrc)/*.c))
+listObjects := $(listSources:%.c=%.o)
+listDeps := $(listSources:%.c=%.d)
+
+listSourcesPath := $(addprefix $(dirSrc)/, $(listSources))
+listObjectsPath := $(addprefix $(dirBuild)/, $(listObjects))
+listDepsPath := $(addprefix $(dirBuild)/, $(listDeps))
+
+#编译目标名称
+target := $(dirBuild)/helloworld
+
+#依赖关系
+.PHONY:all dep clean
+
+all : dep $(target)
+
+dep : $(listDepsPath)
+
+$(listDepsPath) : $(dirBuild)/%.d: $(dirSrc)/%.c
+	touch build;\
+	rm -f $@;\
+	$(CC) -MM $(CFLAGS) $< > $@.$$$$;\
+	sed 's?$(notdir $*).o:?$(dirBuild)/$(notdir $*).o $(dirBuild)/$(notdir $*).d :?g' < $@.$$$$ > $@;\
+	rm -f $@.$$$$
+
+$(warning $(listDepsPath))
+include $(listDepsPath)
+$(warning --------------------2)
+$(target) : $(listObjectsPath)
+	$(CC) -o $@ $^
+
+#main.o : common.h
+#	$(CC) -c $(CFLAGS) $(dirSrc)/$(patsubst %.o,%.c, $@)
+
+#ljprint.o : ljprint.h
+#	$(CC) -c $(CFLAGS) $(dirSrc)/$(patsubst %.o,%.c, $@)
+
+
+clean :
+	-rm $(target) $(listObjectsPath) $(listDepsPath)
+
+	 
